@@ -1,0 +1,48 @@
+---
+title: "Biostat HW3"
+author: "Alyssa Vanderbeek"
+date: "12 October 2018"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
+
+library(tidyverse)
+```
+
+### Problem 3: A rehabilitation center is interested in examining the relationship between physical status before therapy and the time (days) required in physical therapy until successful rehabilitation. Records from patients 18-30 years old were collected and provided to you for statistical analysis (data “Knee.csv”).
+
+### 1. Generate descriptive statistics for each group and comment on the differences observed
+
+```{r}
+# import data
+knee_data = read_csv('~/Desktop/FALL 2018/Biostat I/Homework/data/HW3_export/Knee.csv', col_types = cols()) 
+
+# produce table of summary statistics 
+apply(X = knee_data, FUN = summary, MARGIN = 2) %>% # apply the summary function to each column of the data
+  do.call(bind_rows, .) %>% # take list produced by apply and turn into tibble
+  mutate('Physical Health' = colnames(knee_data)) %>% # make a column specifying what group each row corresponds to
+  select(`Physical Health`, everything()) %>% # rearrange column order
+  knitr::kable(caption = 'Summary statistics across') # make nice-looking table
+
+# boxplot of distribution of days across physical health groups
+knee_data = knee_data %>%
+  gather(key = 'physical_status', value = 'days') 
+
+knee_data %>% # long format for easy plotting
+  ggplot(aes(x = physical_status, y = days)) +
+    geom_boxplot() +
+    labs(title = 'Number of days in physical therapy',
+         x = 'Physical health status',
+         y = 'Days') 
+
+# ANOVA table
+anova(lm(days~factor(physical_status), data = knee_data)) %>%
+  knitr::kable()
+
+# multiple testing adjustments
+pairwise.t.test(knee_data$days, knee_data$physical_status, p.adj = 'bonferroni')
+
+```
+
