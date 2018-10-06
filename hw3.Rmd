@@ -1,9 +1,10 @@
 ---
-title: "Biostat HW3"
-author: "Alyssa Vanderbeek"
-date: "12 October 2018"
 output: pdf_document
 ---
+
+Alyssa Vanderbeek (amv2187)  
+12 October 2018  
+HW 3  
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
@@ -15,12 +16,25 @@ library(tidyverse)
 
 ### 1. The first question is to assess if their body mass index (BMI) has changed 6 years after quitting smoking. Perform an appropriate hypothesis test and interpret your findings.
 
-```{r}
+Because we are looking at the difference in outcomes over time within the same individuals, we perform a paired t test with hypotheses
+$H_0: \Delta = \mu_{\text{6yrs}} - \mu_{\text{baseline}} = 0$ vs.
+$H_1: \Delta \neq 0$
 
+```{r}
+heavy_smoke = read_csv('~/Desktop/FALL 2018/Biostat I/Homework/data/HW3_export/HeavySmoke.csv', col_types = cols()) %>%
+  janitor::clean_names() %>%
+  mutate(diff = bmi_6yrs - bmi_base)
+
+sd(heavy_smoke$diff)
+mean(heavy_smoke$diff)
 ```
 
 
 ### 2. The investigators suspected an overall change in weight over the years, so they decided to enroll a control group of 50-64 years of age that never smoked (data NeverSmoke.csv). Perform an appropriate test to compare the BMI changes between women that quit smoking and women who never smoked. Interpret the findings.
+
+$H_0: \Delta_{\text{smokers}} - \Delta_{\text{not smokers}} = 0$ vs.
+$H_1: \Delta_{\text{smokers}} - \Delta_{\text{not smokers}} \neq 0$
+
 
 ```{r}
 
@@ -78,9 +92,9 @@ $H_0$ = Physical status has no effect on the amount of physical therapy needed f
 
 $H_1$ = Physical status has some effect on the amount of physical therapy needed for rehabilitation. (Duration of physical therapy is different in at least one physical status category)
 
-With a sample size of 30 participants (10 per group), we will reject the null hypothesis in favor of the alternative if the computed F statistic $F$ is greater than the critical value $F_{3-1,30-1,1-\alpha} = F_{2,29,0.95} =$ `r qf(0.95, 2, 29)`.
+With a sample size of 30 participants (10 per group) and $\alpha = 0.01$, we will reject the null hypothesis in favor of the alternative if the computed F statistic $F$ is greater than the critical value $F_{3-1,30-1,1-\alpha} = F_{2,29,0.99} =$ `r qf(0.99, 2, 29)`.
 
-As seen in the below ANOVA table, our F-statistic for the test is greater than 19. Since 19 > `r qf(0.95, 2, 29)`, we reject the null in favor of the alternative that physical status affects the amount of physical therapy needed for rehabilitation.
+As seen in the below ANOVA table, our F-statistic for the test is greater than 19. Since 19 > `r qf(0.99, 2, 29)`, we reject the null in favor of the alternative that physical status affects the amount of physical therapy needed for rehabilitation.
 
 ```{r}
 # ANOVA table
