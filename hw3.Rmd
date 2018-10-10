@@ -19,15 +19,29 @@ library(tidyverse)
 Because we are looking at the difference in outcomes over time within the same individuals, we perform a paired t test with hypotheses
 $H_0: \Delta = \mu_{\text{6yrs}} - \mu_{\text{baseline}} = 0$ vs.
 $H_1: \Delta \neq 0$
+In plain english, we are testing whether there is ($H_1$) or is not ($H_0$) a difference in BMI in women who quit smoking 6 years prior.
+
+We know sample size $n = 10$, and the test statistic is given by  
+$t = \frac{\bar{\Delta} - 0}{s/\sqrt{n}}$, where $\bar{\Delta} = \frac{\sum_{i=1}^n {\Delta_i}}{n}$ and $s = \sqrt{\frac{\sum_{i=1}^n{(\Delta_i - \bar{\Delta)^2}}}{n - 1}}$.
 
 ```{r}
 heavy_smoke = read_csv('~/Desktop/FALL 2018/Biostat I/Homework/data/HW3_export/HeavySmoke.csv', col_types = cols()) %>%
   janitor::clean_names() %>%
   mutate(diff = bmi_6yrs - bmi_base)
 
-sd(heavy_smoke$diff)
-mean(heavy_smoke$diff)
+n1 = nrow(heavy_smoke) # sample size
+dbar = sum(heavy_smoke$diff) / n1 # mean change in BMI
+dif_sq = sum((heavy_smoke$diff - dbar)^2) # sum of squares
+s1 = sqrt(dif_sq / (n1 - 1)) # sample sd
+
+t_heavy = dbar / (s1/sqrt(n1)) # test statistic
+rej1 = qt(p = 0.975, df = n1 - 1)
 ```
+
+Given our data, we find that $\bar{\Delta} =$ `r dbar`, $s =$ `r round(s1, 2)` $t = \frac{3.36}{2.46/\sqrt{10}} =$ `r round(t_heavy, 2)`.
+
+At a 5% significance level, we reject the null hypothesis that there is no change in BMI if the test statistic $t > t_{1-\alpha/2, n-1}$, where $t_{1-\alpha/2, n-1} = t_{0.975, 9} =$ `r rej1`. And since 4.31 > 2.26, we reject the null in favor of the hypothesis and conclude that women who quit smoking after years of heavy consumption may expect a change in BMI in the following years. 
+
 
 
 ### 2. The investigators suspected an overall change in weight over the years, so they decided to enroll a control group of 50-64 years of age that never smoked (data NeverSmoke.csv). Perform an appropriate test to compare the BMI changes between women that quit smoking and women who never smoked. Interpret the findings.
@@ -37,13 +51,36 @@ $H_1: \Delta_{\text{smokers}} - \Delta_{\text{not smokers}} \neq 0$
 
 
 ```{r}
+never_smoke = read_csv('~/Desktop/FALL 2018/Biostat I/Homework/data/HW3_export/NeverSmoke.csv', col_types = cols()) %>%
+  janitor::clean_names() %>%
+  mutate(diff = bmi_6yrs - bmi_base)
 
+# first test for equality of variance
+n2 = nrow(never_smoke) # sample size
+dbar2 = sum(never_smoke$diff) / n2
+dif_sq2 = sum((never_smoke$diff - dbar2)^2) # sum of squares
+s2 = sqrt(dif_sq2 / (n2 - 1)) # sample sd
+
+f = s1^2 / s2^2
+f.rej = qf(p = 0.975, df1 = n1 - 1, df2 = n2 - 1)
+
+# we conclude equal variances between groups
+s_pooled = sqrt(((n1 - 1)*s1^2 + (n2 - 1)*s2^2) / (n1 + n2 - 2))
+
+t_twosample = (dbar - dbar2) / (s_pooled*sqrt((1/n1) + (1/n2)))
+rej2 = qt(p = 0.975, df = n1 + n2 - 2)
+
+# check hand calculations with built-in function
+# t.test(heavy_smoke$diff, never_smoke$diff, alternative = 'two.sided', var.equal = T)
 ```
 
 ### 3. Show the corresponding 95% CI associated with part 2. Interpret it in the context of the problem.
 
 ```{r}
-
+CI = c(
+  (dbar - dbar2) - rej2*(s_pooled*sqrt((1/n1) + (1/n2))),
+  (dbar - dbar2) + rej2*(s_pooled*sqrt((1/n1) + (1/n2)))
+)
 ```
 
 ### 4. Suppose the researchers want to launch into a larger study to prove that a difference does exist between the two groups with respect to BMI changes.
@@ -108,7 +145,8 @@ anova(lm(days~factor(physical_status), data = knee_data)) %>%
 # multiple testing adjustments
 pairwise.t.test(knee_data$days, knee_data$physical_status, p.adj = 'bonferroni')
 TukeyHSD(aov(days~factor(physical_status), data = knee_data))
-# need Dunnett test!!!
+multcomp::glht(aov(days~factor(physical_status), data = knee_data),
+               lincft = mcp(method = "Dunnett"))
 ```
 
 ### 4. Write a short paragraph summarizing your results as if you were presenting to the rehabilitation center director.
