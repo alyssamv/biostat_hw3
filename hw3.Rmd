@@ -1,5 +1,7 @@
 ---
-output: pdf_document
+output: 
+  pdf_document: 
+    keep_tex: yes
 editor_options: 
   chunk_output_type: console
 ---
@@ -14,19 +16,99 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE)
 library(tidyverse)
 ```
 
+### Problem 1
+### 1. Derive E(S2)
+
+Let $X_1, X_2, ..., X_n$ come from a distribution with mean $\mu$ and variance $\sigma^2$. Let $S^2 = \frac{1}{n-1}\sum_{i=1}^n (X_i-\bar{X})^2$. Then
+
+$$
+\begin{aligned}
+E(S^2) &= E[\frac{1}{n-1}\sum_{i=1}^n (X_i-\bar{X})^2] \\
+&= \frac{1}{n-1}E[\sum_{i=1}^n (X_i-\bar{X})^2] \\
+&= \frac{1}{n-1}E[\sum_{i=1}^n (X_i^2 - 2\bar{X}X_i^2-\bar{X}^2)] \\
+&= \frac{1}{n-1}E[\sum_{i=1}^n X_i^2 - 2\bar{X} \sum_{i=1}^n X_i^2 - \sum_{i=1}^n \bar{X}^2)] \\
+\end{aligned}
+$$
+
+Recall that $\bar{X} = \frac{\sum_{i=1}^n X_i}{n} \implies \sum_{i=1}^n X_i = n\bar{X}$.
+
+$$
+\begin{aligned}
+&= \frac{1}{n-1}E[\sum_{i=1}^n X_i^2 - 2n\bar{X}^2 - n\bar{X}^2)] \\
+&= \frac{1}{n-1}E[\sum_{i=1}^n X_i^2 - n\bar{X}^2)] \\
+&= \frac{1}{n-1}[E(\sum_{i=1}^n X_i^2) - nE(\bar{X}^2)] \\
+&= \frac{1}{n-1}[\sum_{i=1}^n E(X_i^2) - nE(\bar{X}^2)]
+\end{aligned}
+$$
+
+Here we can make use of the identity $Var(X) = E(X^2) - E(X)^2$, which gives us $E(X^2) = Var(X) + E(X) = \sigma^2 + \mu$ for all $X_i, i=1,2,..,n$. Additionally, note that for $\bar{X}$, we have 
+
+$$
+\begin{aligned}
+Var(\bar{X}) &= Var(\frac{\sum_{i=1}^n X_i}{n}) \\
+&= \frac{1}{n^2} Var(\sum_{i=1}^n X_i) \\
+&= \frac{1}{n^2} \sum_{i=1}^n Var(X_i) \\
+&= \frac{1}{n^2} \sum_{i=1}^n \sigma^2 \\
+&= \frac{\sigma^2}{n} \\
+\\
+E(\bar{X}) &= E(\bar{X})^2 + Var(\bar{X}) \\
+&= \mu^2 + \frac{\sigma^2}{n}
+\end{aligned}
+$$
+
+Using these identities, we get
+
+$$
+\begin{aligned}
+&= \frac{1}{n-1}[nE(X_i^2) - nE(\bar{X}^2)] \\
+&= \frac{1}{n-1}[n (\mu^2 + \sigma^2) - n (\mu^2 + \frac{\sigma^2}{n})] \\
+&= \frac{1}{n-1} (n\sigma^2 - \sigma^2) \\
+&= \sigma^2
+\end{aligned}
+$$
+
+Therefore, $E(S^2) = \sigma^2$, showing that $S^2 = \frac{1}{n-1}\sum_{i=1}^n (X_i-\bar{X})^2$ is an unbiased estimator of the true variance.
+
+
+
+### 2. Show that SS_total = SS_within + SS_between.
+
+For $k$ groups, each with $n_i, i=1,2,...,k$ observations, 
+
+$$
+\begin{aligned}
+\sum_{i=1}^k \sum_{j=1}^{n_i} (Y_{ij} - \bar{Y})^2 &= 
+  \sum_{i=1}^k \sum_{j=1}^{n_i} (Y_{ij} - \bar{Y}_i + \bar{Y}_i - \bar{Y})^2, \text{ where } \bar{Y}_i \text{ is the within-group average.}  \\
+&= \sum_{i=1}^k \sum_{j=1}^{n_i} [ (Y_{ij} - \bar{Y}_i) + (\bar{Y}_i - \bar{Y}) ]^2 \\
+&= \sum_{i=1}^k \sum_{j=1}^{n_i} [ (Y_{ij} - \bar{Y}_i)^2 + 2(Y_{ij} - \bar{Y}_i)(\bar{Y}_i - \bar{Y}) + (\bar{Y}_i - \bar{Y})^2 ] \\
+&= \sum_{i=1}^k \sum_{j=1}^{n_i} (Y_{ij} - \bar{Y}_i)^2 + 2\sum_{i=1}^k \sum_{j=1}^{n_i}(Y_{ij} - \bar{Y}_i)(\bar{Y}_i - \bar{Y}) + \sum_{i=1}^k \sum_{j=1}^{n_i}(\bar{Y}_i - \bar{Y})^2 \\
+\end{aligned}
+$$
+
+where $2\sum_{i=1}^k \sum_{j=1}^{n_i}(Y_{ij} - \bar{Y}_i)(\bar{Y}_i - \bar{Y}) = 2 \sum_{j=1}^{n_i}(Y_{ij} - \bar{Y}_i) \sum_{i=1}^k(\bar{Y}_i - \bar{Y}) = 0$, since both $(Y_{ij} - \bar{Y}_i)$ and $(\bar{Y}_i - \bar{Y})$ are residual terms, and the sum of residuals must be zero. Therefore, we are left with 
+
+$$ 
+\sum_{i=1}^k \sum_{j=1}^{n_i} (Y_{ij} - \bar{Y})^2 = \sum_{i=1}^k \sum_{j=1}^{n_i} (Y_{ij} - \bar{Y}_i)^2 + \sum_{i=1}^k \sum_{j=1}^{n_i}(\bar{Y}_i - \bar{Y})^2
+$$
+
+which states that the total variability (sum of squares) is equal to the sum of the variability within groups and between groups. 
+
+
+
+\newpage
 ### Problem 2: Cigarette smoking continues to be a public health problem with major consequences on heart and lung diseases. Less is actually known about the consequences of quitting smoking. A recent study selected a group of 10 women working at a small medical practice, ages 50-64, that had smoked at least 1 pack/day and quit for at least 6 years (data “HeavySmoke.csv”).
 
 ### 1. The first question is to assess if their body mass index (BMI) has changed 6 years after quitting smoking. Perform an appropriate hypothesis test and interpret your findings.
 
-Because we are looking at the difference in outcomes over time within the same individuals, we perform a paired t test with hypotheses
+Our hypotheses for the test are:
 
 $$H_0: \Delta = \mu_{\text{6yrs}} - \mu_{\text{baseline}} = 0$$
 $$H_1: \Delta = \mu_{\text{6yrs}} - \mu_{\text{baseline}} \neq 0$$
 
-In plain english, we are testing whether there is ($H_1$) or is not ($H_0$) a difference in BMI in women who quit smoking 6 years prior. Note that we are interested in the change in BMI within each individual. For that reason, we can perform a paired t-test. 
+In plain english, we are testing whether there is ($H_1$) or is not ($H_0$) a change in BMI over time in women who quit smoking 6 years prior. Note that we are interested in the change in BMI within each individual. For that reason, we can perform a paired t-test. 
 
 We know sample size $n = 10$, and the test statistic is given by  
-$t = \frac{\bar{\Delta} - 0}{s/\sqrt{n}}$, where $\bar{\Delta} = \frac{\sum_{i=1}^n {\Delta_i}}{n}$ and $s = \sqrt{\frac{\sum_{i=1}^n{(\Delta_i - \bar{\Delta)^2}}}{n - 1}}$.
+$t = \frac{\bar{\Delta} - 0}{s/\sqrt{n}}$, where $\bar{\Delta} = \frac{\sum_{i=1}^n {\Delta_i}}{n}$ and $s = \sqrt{\frac{\sum_{i=1}^n{(\Delta_i - \bar{\Delta})^2}}{n - 1}}$.
 
 ```{r}
 heavy_smoke = read_csv('~/Desktop/FALL 2018/Biostat I/Homework/data/HW3_export/HeavySmoke.csv', col_types = cols()) %>%
@@ -51,12 +133,12 @@ heavy_smoke %>%
   knitr::kable(caption = 'Change in BMI in women who quit smoking')
 ```
 
-Given our data, we find that 
+Given our data (Table 1), we find that 
 $$\bar{\Delta} = \frac{5.5 + 3.2 + ... + 1.0}{10} = 3.36,$$ 
 $$s = \sqrt{\frac{(5.5-3.36)^2 + (3.2-3.36)^2 + ... (1.0-3.36)^2}{10-1}} = 2.46, \text{and}$$ 
 $$t = \frac{3.36}{2.46/\sqrt{10}} = 4.31.$$
 
-At a 5% significance level, we reject the null hypothesis that there is no change in BMI if the test statistic $t > t_{1-\alpha/2, n-1}$, where $t_{1-\alpha/2, n-1} = t_{0.975, 9} =$ `r rej1`. And since 4.31 > 2.26, we reject the null in favor of the alternative hypothesis and conclude that women who quit smoking after years of heavy consumption experience a change in their BMI after 6 years. 
+At a 5% significance level, we reject the null hypothesis that there is no change in BMI if the test statistic $t > t_{1-\alpha/2, n-1}$, where $t_{1-\alpha/2, n-1} = t_{0.975, 9} =$ `r rej1`. And since 4.31 > 2.26, we reject the null in favor of the alternative hypothesis and conclude that there is sufficient evidence that women who quit smoking after years of heavy consumption experience a change in their BMI after 6 years. 
 
 
 
@@ -65,7 +147,7 @@ At a 5% significance level, we reject the null hypothesis that there is no chang
 $$H_0: \Delta_{\text{smokers}} - \Delta_{\text{not smokers}} = 0$$
 $$H_1: \Delta_{\text{smokers}} - \Delta_{\text{not smokers}} \neq 0$$
 
-Now we are interested in testing whether change in BMI in women ages 50-64 over a 6 year period is different between previously heavy smokers and those who never smoked. Because we have two independent sample (i.e. women who were heavy smokers cannot be said to have never smoked, and vice versa), we perform a two-sample t-test of means.
+Now we are interested in testing whether change in BMI in women ages 50-64 over a 6 year period is different between previously heavy smokers and those who never smoked. Because we have two independent samples (women who were heavy smokers cannot be said to have never smoked, and vice versa), we perform a two-sample t-test of means.
 
 ```{r}
 never_smoke = read_csv('~/Desktop/FALL 2018/Biostat I/Homework/data/HW3_export/NeverSmoke.csv', col_types = cols()) %>%
@@ -97,26 +179,20 @@ bind_cols(heavy_smoke, never_smoke) %>%
   knitr::kable(caption = '6-year change in BMI for female former smokers vs. never smokers')
 ```
 
-From part 1 above, we know that in the smokers group, $\bar{\Delta}_1 = 3.36$ and $s_1 = 2.46$. To calculate these values for the non-smoking group ($n_2 = 10$), we use the same formulas as given in (1) and find that $\bar{\Delta}_2 = \frac{2.8 - 0.9 + ... + 0.8}{10} = 1.55$ and $s_2 = \sqrt{\frac{(2.8-1.55)^2 + (-0.9-1.55)^2 + ... (0.8-1.55)^2}{10-1}} = 2.28$.
+From part (1) above, we know that in the smokers group, $\bar{\Delta}_1 = 3.36$ and $s_1 = 2.46$. To calculate these values for the non-smoking group ($n_2 = 10$), we use the same formulas as given in (1) and find that $\bar{\Delta}_2 = \frac{2.8 - 0.9 + ... + 0.8}{10} = 1.55$ and $s_2 = \sqrt{\frac{(2.8-1.55)^2 + (-0.9-1.55)^2 + ... (0.8-1.55)^2}{10-1}} = 2.28$.
 
-The first step in testing our hypotheses is to first test whether the variances are equal between groups. We compute an F-statistic $F = \frac{s_1^2}{s_2^2} = \frac{2.46^2}{2.28^2} = 1.16$, and we reject the null hypothesis that variances are equal between groups and conclude that they are different if $F > F_{n_1-1, n_2-1}$, where $F_{n_1-1, n_2-1} = F_{9,9} = 4.03$. Since 1.16 < 4.03, we do not reject the stated null hypothesis, and conclude that variances between groups are not different.
+The first step in testing our hypotheses is to first test whether the variances are equal between groups. The null hypothesis for the test is that sample variances are equal ($s_1^2 = s_2^2$), and the alternative is that they are different ($s_1^2 \neq s_2^2$). We compute an F-statistic $F = \frac{s_1^2}{s_2^2} = \frac{2.46^2}{2.28^2} = 1.16$, and we reject the null hypothesis that variances are equal between groups and conclude that they are different if $F > F_{n_1-1, n_2-1}$, where $F_{n_1-1, n_2-1} = F_{9,9} = 4.03$. Since 1.16 < 4.03, we do not reject the stated null hypothesis, and conclude that there is not enough evidence to suggest that variances in each group are different. Therefore, we compute a pooled standard deviation. 
 
-Since we can assume that variances are equal, we know our test statistic is given by
-$$t = \frac{\bar{\Delta}_1 - \bar{\Delta}_2 - 0}{s_{pooled}/\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}}, \text{ where } s_{pooled} = \sqrt{\frac{(n_1-1)s_1^2 + (n_2-1)s_2^2}{n_1 + n_2 -2}}$$
+$$s_{pooled} = \sqrt{\frac{(n_1-1)s_1^2 + (n_2-1)s_2^2}{n_1 + n_2 -2}} = \sqrt{\frac{(10-1)(2.46)^2 + (10-1)(2.28)^2}{10 + 10 -2}} = 1.37$$ 
 
-Then 
-$$s_{pooled} = \sqrt{\frac{(10-1)(2.46)^2 + (10-1)(2.28)^2}{10 + 10 -2}} = 1.37, \text{and}$$
-$$t = \frac{3.36 - 1.55}{1.37/\sqrt{\frac{1}{10} + \frac{1}{10}}} = 1.704.$$
+And for equal variances, we know our test statistic is given by
+$$t = \frac{\bar{\Delta}_1 - \bar{\Delta}_2 - 0}{s_{pooled}/\sqrt{\frac{1}{n_1} + \frac{1}{n_2}}} = \frac{3.36 - 1.55}{1.37/\sqrt{\frac{1}{10} + \frac{1}{10}}} = 1.704$$
 
-We reject the null in favor of the alternative if $t > t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}}$, where $t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}} = t_{18, 0.975} = 2.1$. Since 1.704 < 2.1, we do not reject the null hypothesis, and conclude that there is no difference in BMI change between former smokers and never smokers.
+We reject the null in favor of the alternative if $t > t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}}$, where $t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}} = t_{18, 0.975} = 2.1$ at the 5% significance level. Since 1.704 < 2.1, we fail to reject the null hypothesis, and conclude that there is not enough evidence to suggest a difference in BMI change between former smokers and never smokers.
+
 
 
 ### 3. Show the corresponding 95% CI associated with part 2. Interpret it in the context of the problem.
-
-The 95% CI is calculated as 
-$$(\bar{\Delta}_1 - \bar{\Delta}_2 -  (t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}}) (s_{pooled}) \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}, \bar{\Delta}_1 - \bar{\Delta}_2 +  (t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}}) (s_{pooled}) \sqrt{\frac{1}{n_1} + \frac{1}{n_2}})$$
-
-$$= (3.36 - 1.55 -  (1.704) (2.37) \sqrt{\frac{1}{10} + \frac{1}{10}}, 3.36 - 1.55 + (1.704) (2.37) \sqrt{\frac{1}{10} + \frac{1}{10}})$$
 
 ```{r}
 CI = c(
@@ -124,10 +200,19 @@ CI = c(
   (dbar - dbar2) + rej2*(s_pooled*sqrt((1/n1) + (1/n2)))
 )
 ```
-  
-$$= (-0.421, 4.041)$$ 
 
-Therefore, we are 95% confident that the average difference in BMI change between former smokers and never smokers is between -0.42 and 4.04 BMI units. Since the null hypothesis (a difference of 0) is contained in this interval, we conclude that there is no difference in BMI change over time between groups. However, the lower limit of the CI is very close to 0, and so we may want to conduct a larger study to confirm or debunk the results seen here. 
+The 95% CI is calculated as 
+$$
+\begin{aligned}
+\text{CI} &= (\bar{\Delta}_1 - \bar{\Delta}_2 -  (t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}}) (s_{pooled}) \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}, \bar{\Delta}_1 - \bar{\Delta}_2 +  (t_{n_1 + n_2 - 2, 1- \frac{\alpha}{2}}) (s_{pooled}) \sqrt{\frac{1}{n_1} + \frac{1}{n_2}}) \\
+&= (3.36 - 1.55 -  (1.704) (2.37) \sqrt{\frac{1}{10} + \frac{1}{10}}, 3.36 - 1.55 + (1.704) (2.37) \sqrt{\frac{1}{10} + \frac{1}{10}}) \\
+&= (-0.421, 4.041)
+\end{aligned}
+$$ 
+
+Therefore, we are 95% confident that the average difference in BMI change between former smokers and never smokers is between -0.42 and 4.04 BMI units. Since the null hypothesis (a difference of 0) is contained in this interval, we conclude that there is not enough evidence to suggest a difference in BMI change over time between groups. This conclusion is in agreement with the hypothesis test in part (2). However, the lower limit of the CI is very close to 0, and so we may want to conduct a larger study to confirm or debunk the results seen here. 
+
+
 
 ### 4. Suppose the researchers want to launch into a larger study to prove that a difference does exist between the two groups with respect to BMI changes.
 
@@ -139,30 +224,34 @@ We need not worry about randomization here, since we already know the exposure (
 
 
 
-
 ### (b) Calculate the sample size for the new study. Assuming a two-sided test, create a table showing sample size estimates for 80% vs 90% power, 2.5% vs 5% significance level, using the following information: the true mean increase for smokers is 3.0 kg/m2, with a standard deviation of 2.0 kg/m2; for never-smokers the true mean increase is 1.7 kg/m2, with a standard deviation of 1.5 kg/m2.
 
 For this study we know 
-$$\Delta_1 = 3.0,\sigma_1^2 = 2.0 \text{ for the former smokers, and}$$
-$$\Delta_2 = 1.7, \sigma_2^2 = 1.5 \text{ for the never smokers.}$$.
+$$
+\begin{aligned}
+&\Delta_1 = 3.0,\sigma_1 = 2.0 \text{ for the former smokers, and} \\
+&\Delta_2 = 1.7, \sigma_2 = 1.5 \text{ for the never smokers.}
+\end{aligned}
+$$
 
 Table 3 shows the sample size requirements for 80% and 90% power, and 5% and 2.5% significance using R calculations. Below is the R code for sample size calculations, where sample size estimates are rounded up to the nearest integer. 
 
+Note that the total sample size (assuming $n_1=n_2$) is calculated by
+$$N = 2[ \frac{(\sigma_1^2 + \sigma_2^2)(z_{power} + z_{1-\alpha/2})^2}{(\bar{X}_1 - \bar{X}_2)^2} ] $$
+
 ```{r, echo=T}
-a0.05_p0.8 = ceiling(power.t.test(d = 3.0 - 1.7, 
-                                  sd = 2^2 + 1.5^2, 
-                                  power = 0.8)$n)
-a0.05_p0.9 = ceiling(power.t.test(d = 3.0 - 1.7, 
-                                  sd = 2^2 + 1.5^2, 
-                                  power = 0.9)$n)
-a0.025_p0.8 = ceiling(power.t.test(d = 3.0 - 1.7, 
-                                   sd = 2^2 + 1.5^2, 
-                                   power = 0.8, 
-                                   sig.level = 0.025)$n)
-a0.025_p0.9 = ceiling(power.t.test(d = 3.0 - 1.7, 
-                                   sd = 2^2 + 1.5^2, 
-                                   power = 0.9, 
-                                   sig.level = 0.025)$n)
+var1 = 2.0^2
+var2 = 1.5^2
+mu1 = 3.0
+mu2 = 1.7
+
+samplesize_calc = function(mu1, mu2, var1, var2, power = 0.8, sig.level = 0.05){
+  return(2*((var1 + var2)*(qnorm(power) + qnorm(1 - (sig.level/2)))^2) / (mu1 - mu2)^2)
+}
+a0.05_p0.8 = ceiling(samplesize_calc(mu1, mu2, var1, var2))
+a0.05_p0.9 = ceiling(samplesize_calc(mu1, mu2, var1, var2, power = 0.9))
+a0.025_p0.8 = ceiling(samplesize_calc(mu1, mu2, var1, var2, sig.level = 0.025))
+a0.025_p0.9 = ceiling(samplesize_calc(mu1, mu2, var1, var2, power = 0.9, sig.level = 0.025))
 ```
 
 ```{r}
@@ -178,7 +267,7 @@ tibble(' ' = c('2.5% significance', '5% significance'),
 
 
 
-
+\newpage 
 ### Problem 3: A rehabilitation center is interested in examining the relationship between physical status before therapy and the time (days) required in physical therapy until successful rehabilitation. Records from patients 18-30 years old were collected and provided to you for statistical analysis (data “Knee.csv”).
 
 ### 1. Generate descriptive statistics for each group and comment on the differences observed
@@ -187,19 +276,27 @@ tibble(' ' = c('2.5% significance', '5% significance'),
 # import data
 knee_data = read_csv('~/Desktop/FALL 2018/Biostat I/Homework/data/HW3_export/Knee.csv', col_types = cols()) 
 
+n = nrow(knee_data)
+
 # produce table of summary statistics 
 apply(X = knee_data, FUN = summary, MARGIN = 2) %>% # apply the summary function to each column of the data
   do.call(bind_rows, .) %>% # take list produced by apply and turn into tibble
-  mutate('Physical Health' = colnames(knee_data)) %>%  # make a column specifying what group each row corresponds to
-  select(`Physical Health`, everything()) %>% # rearrange column order
-  
+  mutate('Physical Health' = colnames(knee_data),
+         `NA's` = ifelse(is.na(.$`NA's`), 0, `NA's`),
+         'N' = ifelse(is.na(.$`NA's`), n, n - .$`NA's`)) %>%  # make a column specifying what group each row corresponds to
+  select(`Physical Health`, N, everything()) %>% # rearrange column order
   knitr::kable(caption = 'Summary statistics across') # make nice-looking table
 
 # boxplot of distribution of days across physical health groups
 knee_data = knee_data %>%
   gather(key = 'physical_status', value = 'days') %>%
-  mutate(physical_status = fct_relevel(factor(physical_status), 'Below', 'Average', 'Above'))
+  mutate(physical_status = fct_relevel(factor(physical_status), 'Below', 'Average', 'Above')) %>%
+  filter(!is.na(days))
+```
 
+Based on the summary statistics, the distribution of days spent in physical therapy for those with below average and average health (8 and 10 people, respectively) appear to be overlapping, while those with above average health (7 people) stand separate, with fewer days spent in physical therapy. 
+
+```{r}
 knee_data %>% # long format for easy plotting
   ggplot(aes(x = physical_status, y = days)) +
     geom_boxplot() +
@@ -208,21 +305,26 @@ knee_data %>% # long format for easy plotting
          y = 'Days') 
 ```
 
+
+
+
 ### 2. Using a type I error of 0.01, obtain the ANOVA table. State the hypotheses, decision rule and conclusion.
 
-$H_0$ = Physical status has no effect on the amount of physical therapy needed for rehabilitation. (Duration of physical therapy is the same in all physical status categories)
+The hypotheses for the ANOVA test are:  
 
-$H_1$ = Physical status has some effect on the amount of physical therapy needed for rehabilitation. (Duration of physical therapy is different in at least one physical status category)
+$H_0: \mu_{\text{below}} = \mu_{\text{average}} = \mu_{\text{above}}$. In other words, physical status has no effect on the amount of physical therapy needed for rehabilitation. (Duration of physical therapy is the same in all physical status categories)
+$H_1: \text{not all } \mu \text{ equal.}$ Physical status has some effect on the amount of physical therapy needed for rehabilitation. (Duration of physical therapy is different in at least one physical status category)
 
-With a sample size of 30 participants (10 per group) and $\alpha = 0.01$, we will reject the null hypothesis in favor of the alternative if the computed F statistic $F$ is greater than the critical value $F_{3-1,30-1,1-\alpha} = F_{2,29,0.99} =$ `r qf(0.99, 2, 29)`.
-
-As seen in the below ANOVA table, our F-statistic for the test is greater than 19. Since 19 > `r qf(0.99, 2, 29)`, we reject the null in favor of the alternative that physical status affects the amount of physical therapy needed for rehabilitation.
+With a sample size of 25 participants (n), 3 groups (k), and $\alpha = 0.01$, we will reject the null hypothesis in favor of the alternative if the computed $F$ statistic $F$ is greater than the critical value $F_{k-1, n-k, 1-\alpha} = F_{3-1,25-3,1-0.01} = F_{2,22,0.99} =$ `r qf(0.99, 2, 22)`.
 
 ```{r}
 # ANOVA table
 anova(lm(days~factor(physical_status), data = knee_data)) %>%
   knitr::kable()
 ```
+
+As seen in the below ANOVA table, our F-statistic for the test is 19.28. Since 19.28 > `r qf(0.99, 2, 22)`, we reject the null in favor of the alternative that physical status affects the amount of physical therapy needed for rehabilitation.
+
 
 ### 3. Based on your response in part 3, perform pairwise comparisons with the appropriate adjustments (Bonferroni, Tukey, and Dunnett – ‘below average’ as reference). Report your findings and comment on the differences/similarities between these three methods.
 
@@ -234,6 +336,11 @@ summary(multcomp::glht(aov(days~factor(physical_status), data = knee_data),
                lincft = mcp(method = "Dunnett")))
 ```
 
+All three pairwise comparison tests conclude that those in the 'above average' health category spend significantly less (at a 1% significance level) time in physical therapy than those of average or below average health, who spend a comparable amount of time in physical therapy. Though all three adjustments conclude the same thing, notice that Bonferroni is the most conservative of the bunch, yielding the highest p-values and making it hardest to reject the null that there is a difference in means (in this case, time spent in physical therapy) between health levels. In terms of conservativeness, it is followed by Tukey, and finally Dunnett.
+
+
+
+
 ### 4. Write a short paragraph summarizing your results as if you were presenting to the rehabilitation center director.
 
 Using this data, we are interested in knowing whether someone's overall physical health status (e.g. below, at, or above average) impacts the amount of time needed in physical therapy in order to fully recover. Since we have three categories of physical fitness, we can use an ANOVA test to understand whether at least one of these groups has a significantly different distribution of physical therapy duration. According to this test, and at a 5% significant level, we conclude that in fact physical fitness does have an impact on the duration of physical therapy. Upon further examination, people in the 'above average' category spend a significantly less amount of time (number of days) in physical therapy, whereas there was no difference in the amount of time spent in physical therapy for those of average or below average health. Statisical results are provided above, as well as a figure depicting the distribution of physical therapy duration in each group. 
@@ -241,6 +348,7 @@ Using this data, we are interested in knowing whether someone's overall physical
 
 
 
+\newpage  
 ### Problem 4: For this problem you will use the built-in R data called “UCBAdmissions” (library ‘datasets’), an example of sex bias in admission practices. You are interested in comparing the proportions of women vs men admitted at Berkeley (over all departments).
 
 ### 1. Provide point estimates and 95% CIs for the overall proportions of men and women admitted at Berkeley. Briefly comment on the values.
@@ -269,13 +377,13 @@ n.women = 557 + 1278
 n.men = 1198 + 1493
 
 men.ci = c(
-  0.445 - qnorm(0.975)*sqrt((0.445*(1 - 0.445))/2691),
-  0.445 + qnorm(0.975)*sqrt((0.445*(1 - 0.445))/2691)
+  prop.men - qnorm(0.975)*sqrt((prop.men*(1 - prop.men))/n.men),
+  prop.men + qnorm(0.975)*sqrt((prop.men*(1 - prop.men))/n.men)
 )
 
 women.ci = c(
-  0.304 - qnorm(0.975)*sqrt((0.304*(1 - 0.304))/1835),
-  0.304 + qnorm(0.975)*sqrt((0.304*(1 - 0.304))/1835)
+  prop.women - qnorm(0.975)*sqrt((prop.women*(1 - prop.women))/n.women),
+  prop.women + qnorm(0.975)*sqrt((prop.women*(1 - prop.women))/n.women)
 )
 ```
 
@@ -301,29 +409,34 @@ Because we're dealing with proportions in two populations (male and female), we 
 $$H_0: p_{men} - p_{women} = 0$$
 $$H_1: p_{men} - p_{women} \neq 0$$
 
-```{r}
+We don't need to test for equality of variances here since we operate under a normality assumption (via part 1 above), and can calculate the test statistic directly using the formula
+$$z = \frac{\hat{p}_1 - \hat{p}_2}{\sqrt{\hat{p}(1-\hat{p})(\frac{1}{n_1} + \frac{1}{n2})}}, \text{ where } \hat{p} = \frac{n_1p_1 + n_2p_2}{n_1 + n_2}$$.
+
+Using R we find that $\hat{p} = 0.38$ and $z = -9.55$. Our p-value for the hypothesis test is <0.0001, and we can conclude that there is a difference in the proportion of men and women who are accepted to UC Berkeley across all departments. Below is a function I wrote to perform the hypothesis test, with an option to include a continuity correction.
+
+```{r, echo=T}
 # p1, p2 = the proportion observed in groups 1 and 2
 # n1, n2 = sample sizes in groups 1 and 2
 # sig.level = significance (alpha) level. Default to 0.05
-# cont.correction = logical (T/F) for whether to apply a continuity correction. Default is FALSE.
-prop.t.test = function(p1, p2, n1, n2, sig.level = 0.05, cont.correction = FALSE){
+# cont.correction = logical (T/F) for whether to apply a continuity correction. 
+#                   Default is FALSE.
+prop.z.test = function(p1, p2, n1, n2, sig.level = 0.05, cont.correction = FALSE){
   p.hat = (n1*p1 + n2*p2) / (n1 + n2)
   p.bar = p1 - p2
   
   if (cont.correction == F) {
-    t = p.bar / sqrt(p.hat*(1 - p.hat)*(1/n1 + 1/n2))
+    z = p.bar / sqrt(p.hat*(1 - p.hat)*(1/n1 + 1/n2))
   } else {
-    t = (p.bar - (1/(2*n1) + 1/(2*n2))) / sqrt(p.hat*(1 - p.hat)*(1/n1 + 1/n2))
+    z = (p.bar - (1/(2*n1) + 1/(2*n2))) / sqrt(p.hat*(1 - p.hat)*(1/n1 + 1/n2))
   }
   
-  pval = 1 - pnorm(abs(t))
+  pval = 1 - pnorm(abs(z))
   
   return(list(
-    t = t,
+    z = z,
+    phat = p.hat,
     p.val = pval
   ))
 }
-
-prop.t.test(prop.women, prop.men, n.women, n.men)
 ```
 
